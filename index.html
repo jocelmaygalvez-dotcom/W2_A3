@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sentence Puzzled - PC Maintenance & Optimization</title>
+    <!-- Tailwind CSS for modern responsive utility design -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+        
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: radial-gradient(circle at top, #fffefe 0%, #edeef2 100%);
+        }
+
+        /* BADASNHS SHS Custom Colors */
+        :root {
+            --badas-red: #E31E24;
+            --badas-red-hover: #C11319;
+            --badas-light-red: #FFF1F2;
+        }
+
+        .text-badas { color: var(--badas-red); }
+        .bg-badas { background-color: var(--badas-red); }
+        .bg-badas:hover { background-color: var(--badas-red-hover); }
+        .border-badas { border-color: var(--badas-red); }
+        
+        /* Interactive Block Animating */
+        .block-interactive {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .block-interactive:active {
+            transform: scale(0.95);
+        }
+
+        /* Floating effects */
+        @keyframes float-diag {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-3px); }
+        }
+        .animate-float {
+            animation: float-diag 4s ease-in-out infinite;
+        }
+
+        /* Error Shake */
+        @keyframes shake-panel {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-8px); }
+            40%, 80% { transform: translateX(8px); }
+        }
+        .animate-shake {
+            animation: shake-panel 0.35s ease-in-out;
+        }
+
+        /* Progress track styling */
+        .track-gradient {
+            background-image: linear-gradient(to right, #f3f4f6 0%, rgba(227, 30, 36, 0.08) 100%);
+        }
+
+        #confetti-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 100;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4 overflow-x-hidden relative">
+
+    <canvas id="confetti-canvas"></canvas>
+
+    <!-- Main Game Board Container -->
+    <div class="w-full max-w-2xl bg-white rounded-3xl shadow-2xl border border-gray-100 overflow-hidden relative z-10 my-4 flex flex-col">
+        
+        <!-- School Color Border Accent -->
+        <div class="bg-badas h-3 w-full"></div>
+
+        <!-- Header Panel with Logo and Creator Info -->
+        <div class="px-6 pt-6 pb-4 flex flex-col sm:flex-row items-center justify-between border-b border-gray-100 gap-4">
+            <div class="flex items-center gap-4">
+                <div class="relative w-20 h-20 bg-white rounded-2xl shadow-md p-1 border border-red-100 flex items-center justify-center overflow-hidden">
+                    <!-- Logo image with fall-back vector option -->
+                    <img id="school-logo-img" src="logo.png.png" alt="BADASNHS Logo" class="object-contain w-full h-full" onerror="handleImageError(this)">
+                </div>
+                <div class="text-center sm:text-left">
+                    <h1 class="text-2xl font-extrabold tracking-tight text-gray-900 flex items-center justify-center sm:justify-start gap-1">
+                        BADASNHS <span class="text-badas">SHS</span>
+                    </h1>
+                    <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest flex items-center justify-center sm:justify-start gap-1">
+                        <span>🔧</span> SENTENCE PUZZLED: OPTIMIZATION
+                    </p>
+                </div>
+            </div>
+            <!-- Speedrun Metadata -->
+            <div class="flex flex-col items-center sm:items-end gap-1">
+                <span class="text-[10px] font-bold px-3 py-1 bg-red-50 text-badas rounded-full border border-red-100 tracking-wide uppercase">
+                    3-Min System Run
+                </span>
+                <span class="text-[9px] text-gray-400">Created by: <b>BADASNHS_SHS</b></span>
+            </div>
+        </div>
+
+        <!-- ================= START SCREEN ================= -->
+        <div id="start-screen" class="p-8 text-center flex-grow flex flex-col justify-center items-center gap-6">
+            <div class="w-24 h-24 bg-red-50 rounded-full flex items-center justify-center text-badas text-5xl shadow-inner animate-float">
+                <!-- SVG combined: Gears, Tools and Network nodes -->
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-12 h-12 text-badas" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+                </svg>
+            </div>
+            
+            <div class="space-y-2 max-w-md">
+                <h2 class="text-3xl font-black text-gray-800">The Maintenance Sentences!</h2>
+                <p class="text-gray-500 text-sm leading-relaxed">
+                    Unscramble critical computer tune-up, diagnostics, and preventative maintenance sentences by clicking the correct word blocks in order. Solve all levels before the 3-minute timer runs out!
+                </p>
+            </div>
+
+            <!-- Running Learner & Creator visual indicators -->
+            <div class="grid grid-cols-2 gap-4 w-full max-w-md mt-2">
+                <div class="bg-gray-50 rounded-2xl p-3 border border-gray-100 flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-red-50 text-badas flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                            <circle cx="12" cy="4" r="2" />
+                            <path d="M12 6c-.5 0-.9.2-1.3.5L7.2 9.8c-.4.3-.7.8-.7 1.3 0 1 .8 1.8 1.8 1.8.4 0 .8-.1 1.1-.4l1.6-1.3v4.6c0 .5.2.9.5 1.3l2.8 3.5c.3.4.8.6 1.3.6h.4c.8 0 1.5-.7 1.5-1.5 0-.4-.2-.8-.4-1.1l-2.1-2.6V11.2l1.6 1.4c.3.3.7.4 1.1.4.9 0 1.7-.8 1.7-1.8 0-.5-.2-1-.6-1.3l-3.3-3.2c-.4-.5-1-.7-1.7-.7h-.7z" />
+                        </svg>
+                    </div>
+                    <div class="text-left">
+                        <h4 class="text-xs font-bold text-gray-700">Running Learner</h4>
+                        <p class="text-[10px] text-gray-400">Paces systemic diagnostics</p>
+                    </div>
+                </div>
+                <div class="bg-gray-50 rounded-2xl p-3 border border-gray-100 flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                        </svg>
+                    </div>
+                    <div class="text-left">
+                        <h4 class="text-xs font-bold text-gray-700">Digital Creator</h4>
+                        <p class="text-[10px] text-gray-400">Designs structural workflows</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Play Buttons -->
+            <div class="w-full max-w-xs space-y-3 mt-4">
+                <button onclick="startGameRun()" class="w-full bg-badas text-white font-extrabold text-lg py-4 px-8 rounded-2xl shadow-lg hover:shadow-xl hover:translate-y-[-2px] transition-all duration-200 uppercase tracking-wider">
+                    Start Sentence Rush
+                </button>
+                <div class="text-xs text-gray-400 font-semibold">Tiers progress automatically from Easiest to Difficult!</div>
+            </div>
+        </div>
+
+        <!-- ================= ACTIVE GAME SCREEN ================= -->
+        <div id="game-screen" class="hidden p-6 flex-grow flex flex-col justify-between gap-6">
+            
+            <!-- Metadata & Diagnostics Headers -->
+            <div>
+                <div class="flex justify-between items-center mb-4">
+                    <div class="flex items-center gap-2">
+                        <span id="difficulty-badge" class="px-3 py-1 text-xs font-extrabold rounded-lg text-white bg-green-500 shadow-sm transition-all duration-300">
+                            EASIEST
+                        </span>
+                        <span class="text-xs font-semibold text-gray-400" id="word-progress-display">Sentence 1 of 2</span>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <div class="text-right">
+                            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Tune-up Points</p>
+                            <p class="text-xl font-black text-gray-800" id="score-display">0</p>
+                        </div>
+                        <div class="h-8 w-[1px] bg-gray-200"></div>
+                        <div class="text-right">
+                            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Global Timer</p>
+                            <p class="text-xl font-black text-badas tracking-wide transition-all" id="global-timer-display">03:00</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Runner track representing maintenance progress toward an optimized PC -->
+                <div class="w-full h-12 bg-gray-100 rounded-2xl relative overflow-hidden flex items-center px-4 border border-gray-200/50">
+                    <div class="absolute left-0 top-0 h-full track-gradient transition-all duration-500" id="track-progress-fill" style="width: 10%;"></div>
+                    
+                    <!-- Target Optimized Core Server -->
+                    <div class="absolute right-3 text-2xl animate-pulse">
+                        🖥️
+                    </div>
+
+                    <!-- The Running Learner Indicator -->
+                    <div class="absolute transition-all duration-500 ease-out flex flex-col items-center z-10" id="runner-avatar" style="left: calc(10% - 15px);">
+                        <div class="bg-white p-1 rounded-full shadow-md border border-red-100 text-badas animate-bounce" style="animation-duration: 0.8s;">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6">
+                                <circle cx="12" cy="4" r="2" />
+                                <path d="M12 6c-.5 0-.9.2-1.3.5L7.2 9.8c-.4.3-.7.8-.7 1.3 0 1 .8 1.8 1.8 1.8.4 0 .8-.1 1.1-.4l1.6-1.3v4.6c0 .5.2.9.5 1.3l2.8 3.5c.3.4.8.6 1.3.6h.4c.8 0 1.5-.7 1.5-1.5 0-.4-.2-.8-.4-1.1l-2.1-2.6V11.2l1.6 1.4c.3.3.7.4 1.1.4.9 0 1.7-.8 1.7-1.8 0-.5-.2-1-.6-1.3l-3.3-3.2c-.4-.5-1-.7-1.7-.7h-.7z" />
+                            </svg>
+                        </div>
+                        <span class="text-[8px] font-extrabold text-badas bg-white/95 px-1.5 py-0.5 rounded border border-red-100 mt-1 shadow-sm whitespace-nowrap">Learner</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Puzzle Central Card -->
+            <div id="puzzle-box" class="bg-gray-50 rounded-3xl p-5 border border-gray-100 flex-grow flex flex-col justify-center items-center gap-6 relative min-h-[250px]">
+                
+                <!-- ASSEMBLY LAYOUT ZONE -->
+                <div class="flex flex-col items-center w-full gap-2">
+                    <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Assembled System Instruction</p>
+                    <div id="answer-zone" class="flex flex-wrap justify-center items-center gap-2.5 min-h-[60px] w-full p-3 border-2 border-dashed border-gray-200 rounded-2xl bg-white/50">
+                        <!-- Placed sentence words appear here dynamically -->
+                    </div>
+                </div>
+
+                <!-- SCRAMBLED WORDS ZONE -->
+                <div class="flex flex-col items-center w-full gap-2">
+                    <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Click word cards to arrange</p>
+                    <div id="scrambled-zone" class="flex flex-wrap justify-center gap-2.5">
+                        <!-- Scrambled word items rendered here -->
+                    </div>
+                </div>
+
+                <!-- Tactical Maintenance Clue Hint -->
+                <div class="w-full bg-white p-4 rounded-2xl border border-gray-100 shadow-sm text-center">
+                    <span class="text-[9px] font-bold text-red-600 bg-red-50 px-2 py-0.5 rounded-md uppercase tracking-wider mb-1 inline-block">Diagnostic Hint</span>
+                    <p id="hint-text" class="text-xs sm:text-sm text-gray-600 font-semibold italic">
+                        Physical debris inside chassis causing thermal issues.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Dynamic Feedback and Action Elements -->
+            <div class="space-y-4">
+                
+                <!-- Feedback Status Notification -->
+                <div id="feedback-toast" class="h-6 flex items-center justify-center transition-all duration-300 opacity-0 transform translate-y-1">
+                    <span id="feedback-text" class="text-sm font-extrabold text-green-600">Correct Diagnostics Sequence!</span>
+                </div>
+
+                <!-- Controls Layout -->
+                <div class="grid grid-cols-3 gap-2">
+                    <button onclick="resetAssembly()" class="bg-gray-100 text-gray-700 font-bold py-3 px-2 rounded-xl hover:bg-gray-200 transition-colors text-xs flex items-center justify-center gap-1.5">
+                        <span>🔄</span> Clear Workspace
+                    </button>
+                    <button onclick="applyAutoWordHint()" class="bg-amber-50 text-amber-700 border border-amber-100 font-bold py-3 px-2 rounded-xl hover:bg-amber-100 transition-colors text-xs flex items-center justify-center gap-1.5">
+                        <span>💡</span> Next Word Hint
+                    </button>
+                    <button onclick="submitSentenceCheck()" class="bg-badas text-white font-extrabold py-3 px-2 rounded-xl hover:bg-badas-hover transition-colors shadow-md text-xs flex items-center justify-center gap-1.5">
+                        <span>Submit Instruction</span> ➔
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= GAME OVER SCREEN ================= -->
+        <div id="game-over-screen" class="hidden p-8 text-center flex-grow flex flex-col justify-center items-center gap-6">
+            
+            <div id="result-badge-container" class="w-28 h-28 bg-red-50 rounded-full flex items-center justify-center text-badas text-6xl shadow-lg relative">
+                <span id="result-emoji">🏆</span>
+                <div class="absolute inset-0 border-4 border-red-200 rounded-full animate-pulse opacity-50"></div>
+            </div>
+
+            <div class="space-y-1 max-w-sm">
+                <h2 id="result-title" class="text-3xl font-black text-gray-800">Diagnostics Completed!</h2>
+                <p id="result-subtitle" class="text-gray-500 text-sm leading-relaxed">
+                    Great system restoration effort. All maintenance steps formulated and verified.
+                </p>
+            </div>
+
+            <!-- Scorecard block -->
+            <div class="w-full max-w-sm bg-gray-50 p-6 rounded-2xl border border-gray-100 grid grid-cols-2 gap-4 divide-x divide-gray-200">
+                <div class="text-center">
+                    <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest block">Accuracy Score</span>
+                    <span id="final-score" class="text-3xl font-black text-gray-800">0</span>
+                </div>
+                <div class="text-center">
+                    <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest block">Optimization Rank</span>
+                    <span id="sysadmin-level" class="text-base font-black text-red-600 block mt-1">IT Expert</span>
+                </div>
+            </div>
+
+            <!-- Certification badge recognition -->
+            <div class="w-full max-w-sm bg-red-50/50 p-4 rounded-2xl border border-red-100 text-left flex items-start gap-3">
+                <div class="text-xl">🎓</div>
+                <div class="text-xs text-gray-600">
+                    <p class="font-bold text-gray-800 mb-0.5">BADASNHS_SHS Certification</p>
+                    <p>Issued to our Running Learner for demonstrating computer maintenance, system diagnostics, and hardware optimization workflows under high temporal stress.</p>
+                </div>
+            </div>
+
+            <!-- Play triggers -->
+            <button onclick="startGameRun()" class="w-full max-w-xs bg-badas text-white font-extrabold text-lg py-4 px-8 rounded-2xl shadow-md hover:shadow-lg transition-all duration-200 uppercase tracking-wider">
+                Start New Sequence Run
+            </button>
+        </div>
+
+        <!-- Empowerment Technology Footnote -->
+        <div class="bg-gray-50 py-3 px-6 text-center border-t border-gray-100 text-[11px] text-gray-500 font-bold tracking-wide">
+            🌱 Empowerment Technology by <span class="text-badas">NEGZPOINT05</span>
+        </div>
+
+    </div>
+
+    <!-- Gameplay JS Engine -->
+    <script>
+        // --- Web Audio Synthesizer For Sound Effects (Self-contained) ---
+        const AudioSynth = {
+            ctx: null,
+            init() {
+                if (!this.ctx) {
+                    this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+            },
+            play(type) {
+                this.init();
+                if (!this.ctx) return;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                const now = this.ctx.currentTime;
+
+                if (type === 'click') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(500, now);
+                    osc.frequency.exponentialRampToValueAtTime(180, now + 0.05);
+                    gain.gain.setValueAtTime(0.06, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.05);
+                    osc.start(now);
+                    osc.stop(now + 0.05);
+                } else if (type === 'correct') {
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(523.25, now); // C5
+                    osc.frequency.setValueAtTime(659.25, now + 0.1); // E5
+                    osc.frequency.exponentialRampToValueAtTime(1046.50, now + 0.25); // C6
+                    gain.gain.setValueAtTime(0.12, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.35);
+                    osc.start(now);
+                    osc.stop(now + 0.35);
+                } else if (type === 'incorrect') {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(120, now);
+                    osc.frequency.linearRampToValueAtTime(60, now + 0.3);
+                    gain.gain.setValueAtTime(0.15, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.35);
+                    osc.start(now);
+                    osc.stop(now + 0.35);
+                } else if (type === 'hint') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(320, now);
+                    osc.frequency.exponentialRampToValueAtTime(450, now + 0.1);
+                    gain.gain.setValueAtTime(0.08, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
+                    osc.start(now);
+                    osc.stop(now + 0.15);
+                } else if (type === 'win-fanfare') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(523.25, now); // C5
+                    osc.frequency.setValueAtTime(659.25, now + 0.1); // E5
+                    osc.frequency.setValueAtTime(783.99, now + 0.2); // G5
+                    osc.frequency.setValueAtTime(1046.50, now + 0.3); // C6
+                    gain.gain.setValueAtTime(0.15, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.6);
+                    osc.start(now);
+                    osc.stop(now + 0.6);
+                }
+            }
+        };
+
+        // --- Structured Maintenance & Optimization Sentences Database (Easiest to Difficult) ---
+        const DATABASE = {
+            easiest: [
+                { words: ["Clean", "PC", "dust."], hint: "Keep cooling vents clear of particulate blockage to prevent processor throttling." },
+                { words: ["Free", "RAM", "now."], hint: "Unload redundant back-ground software tasks from physical system memory." },
+                { words: ["Run", "a", "scan."], hint: "Launch diagnostic or security processes to search files for operational errors." }
+            ],
+            easy: [
+                { words: ["Clean", "internal", "cooling", "fans."], hint: "Ensure physical blades spin unrestricted to prevent thermal emergency shutdowns." },
+                { words: ["Update", "your", "system", "drivers."], hint: "Keep interface interpreter scripts current to avoid hardware instability." },
+                { words: ["Always", "backup", "vital", "data."], hint: "Protect important master sectors to survive potential logical file corruption." }
+            ],
+            medium: [
+                { words: ["Delete", "cached", "temporary", "junk", "files."], hint: "Clear out residual cached directories that throttle system write space." },
+                { words: ["Defragment", "mechanical", "hard", "drive", "sectors."], hint: "Realign split mechanical platter sequences to improve standard file reads." },
+                { words: ["Monitor", "internal", "processor", "core", "temperatures."], hint: "Routinely audit cooling status to avoid computer silicon thermal damage." }
+            ],
+            difficult: [
+                { words: ["Remove", "unneeded", "startup", "apps", "to", "boost", "speed."], hint: "Trim startup settings to minimize computer start times and idle loads." },
+                { words: ["Isolate", "suspected", "malicious", "threats", "in", "safe", "quarantine."], hint: "Isolate software bugs from accessing root pathways to protect systems." }
+            ],
+            veryDifficult: [
+                { words: ["Audit", "critical", "system", "registries", "to", "mend", "invalid", "parameters."], hint: "Prune broken OS registry settings pathways to prevent fatal runtime errors." },
+                { words: ["Execute", "preventative", "diagnostic", "scans", "regularly", "to", "stop", "crashes."], hint: "Plan structural tune-ups beforehand to guarantee persistent system stability." }
+            ]
+        };
+
+        const TIERS = ["easiest", "easy", "medium", "difficult", "veryDifficult"];
+        
+        // --- State Variables ---
+        let currentTierIdx = 0;
+        let currentWordIdx = 0;
+        const sentencesPerTier = 2; // Sentences needed to advance tier
+
+        let score = 0;
+        let globalTimeRemaining = 180; // 3-Minute Global Countdown (180s)
+        let timerInterval = null;
+        
+        let targetSentenceObj = {};
+        let sentenceSequenceArray = []; // Correct order of words e.g. ["Clean", "PC", "dust."]
+        let assembledWords = []; // Placed word objects: { word: "Clean", id: 2 }
+        let scrambledWords = []; // Scrambled word structures: { id: 0, word: "PC", used: false }
+
+        // Element Selectors
+        const startScreen = document.getElementById("start-screen");
+        const gameScreen = document.getElementById("game-screen");
+        const gameOverScreen = document.getElementById("game-over-screen");
+
+        const globalTimerDisplay = document.getElementById("global-timer-display");
+        const scoreDisplay = document.getElementById("score-display");
+        const difficultyBadge = document.getElementById("difficulty-badge");
+        const wordProgressDisplay = document.getElementById("word-progress-display");
+        const trackProgressFill = document.getElementById("track-progress-fill");
+        const runnerAvatar = document.getElementById("runner-avatar");
+        const hintTextEl = document.getElementById("hint-text");
+        
+        const answerZone = document.getElementById("answer-zone");
+        const scrambledZone = document.getElementById("scrambled-zone");
+        const feedbackToast = document.getElementById("feedback-toast");
+        const feedbackText = document.getElementById("feedback-text");
+
+        const finalScoreVal = document.getElementById("final-score");
+        const sysadminLevelEl = document.getElementById("sysadmin-level");
+        const resultEmoji = document.getElementById("result-emoji");
+        const resultTitle = document.getElementById("result-title");
+        const resultSubtitle = document.getElementById("result-subtitle");
+
+        // Custom Vector fallback in case school logo load fails
+        function handleImageError(img) {
+            img.outerHTML = `
+            <svg class="w-full h-full text-red-600" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="50" cy="50" r="45" fill="none" stroke="currentColor" stroke-width="4" stroke-dasharray="2,2"/>
+                <path d="M50,15 L78,35 L78,65 L50,85 L22,65 L22,35 Z" fill="#E31E24"/>
+                <text x="50" y="55" font-family="'Plus Jakarta Sans', sans-serif" font-weight="bold" font-size="14" fill="white" text-anchor="middle">BADAS</text>
+                <text x="50" y="68" font-family="'Plus Jakarta Sans', sans-serif" font-weight="bold" font-size="9" fill="white" text-anchor="middle">NHS</text>
+            </svg>
+            `;
+        }
+
+        // Sentence Scrambler
+        function scramble(array) {
+            const arr = [...array];
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            // Check if identical to correct sentence structure
+            if (arr.join(" ") === array.join(" ") && array.length > 1) {
+                return scramble(array);
+            }
+            return arr;
+        }
+
+        // --- Start Game Loop ---
+        function startGameRun() {
+            score = 0;
+            currentTierIdx = 0;
+            currentWordIdx = 0;
+            globalTimeRemaining = 180; // 3-minutes strict
+
+            scoreDisplay.textContent = score;
+            startScreen.classList.add("hidden");
+            gameOverScreen.classList.add("hidden");
+            gameScreen.classList.remove("hidden");
+
+            clearInterval(timerInterval);
+            startGlobalCountdown();
+            loadSentencePuzzle();
+        }
+
+        // --- Global Timer Engine ---
+        function startGlobalCountdown() {
+            updateTimerDisplay();
+            timerInterval = setInterval(() => {
+                globalTimeRemaining--;
+                updateTimerDisplay();
+
+                if (globalTimeRemaining <= 0) {
+                    clearInterval(timerInterval);
+                    terminateGame(false);
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            const mins = Math.floor(globalTimeRemaining / 60);
+            const secs = globalTimeRemaining % 60;
+            const displayStr = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+            globalTimerDisplay.textContent = displayStr;
+
+            if (globalTimeRemaining <= 30) {
+                globalTimerDisplay.className = "text-xl font-black text-badas animate-pulse";
+            } else {
+                globalTimerDisplay.className = "text-xl font-black text-gray-800";
+            }
+        }
+
+        // --- Build Active Sentence Puzzle ---
+        function loadSentencePuzzle() {
+            assembledWords = [];
+            
+            const tierName = TIERS[currentTierIdx];
+            const pool = DATABASE[tierName];
+            targetSentenceObj = pool[Math.floor(Math.random() * pool.length)];
+            sentenceSequenceArray = targetSentenceObj.words;
+
+            // Set clues & headers
+            hintTextEl.textContent = targetSentenceObj.hint;
+            wordProgressDisplay.textContent = `Sentence ${currentWordIdx + 1} of ${sentencesPerTier}`;
+            updateDifficultyBadge(tierName);
+            updateTrackLayout();
+
+            // Structure word blocks
+            const scrambled = scramble(sentenceSequenceArray);
+            scrambledWords = scrambled.map((word, index) => ({
+                id: index,
+                word: word,
+                used: false
+            }));
+
+            renderBlocks();
+        }
+
+        function updateDifficultyBadge(tier) {
+            difficultyBadge.textContent = tier.toUpperCase();
+            difficultyBadge.className = "px-3 py-1 text-xs font-extrabold rounded-lg text-white shadow-sm transition-all duration-300 ";
+            
+            if (tier === "easiest") difficultyBadge.classList.add("bg-green-500");
+            else if (tier === "easy") difficultyBadge.classList.add("bg-teal-500");
+            else if (tier === "medium") difficultyBadge.classList.add("bg-yellow-500");
+            else if (tier === "difficult") difficultyBadge.classList.add("bg-orange-500");
+            else if (tier === "veryDifficult") difficultyBadge.classList.add("bg-red-600");
+        }
+
+        // --- Render Assembly Word Blocks ---
+        function renderBlocks() {
+            // 1. Render Assembled Workspace
+            answerZone.innerHTML = "";
+            if (assembledWords.length === 0) {
+                // Empty placeholder text
+                const placeholder = document.createElement("span");
+                placeholder.className = "text-xs font-bold text-gray-300 uppercase tracking-widest";
+                placeholder.textContent = "Assembly Area Empty";
+                answerZone.appendChild(placeholder);
+            } else {
+                assembledWords.forEach((blockObj, index) => {
+                    const block = document.createElement("button");
+                    block.textContent = blockObj.word;
+                    block.className = "px-3 py-2 bg-badas text-white font-bold text-sm sm:text-base rounded-xl shadow-md cursor-pointer block-interactive hover:bg-red-600";
+                    block.onclick = () => removeBlockFromWorkspace(index);
+                    answerZone.appendChild(block);
+                });
+            }
+
+            // 2. Render Scrambled Resource Blocks
+            scrambledZone.innerHTML = "";
+            scrambledWords.forEach((blockObj) => {
+                const btn = document.createElement("button");
+                btn.textContent = blockObj.word;
+                
+                if (blockObj.used) {
+                    btn.className = "px-3 py-2 bg-gray-100/40 text-transparent border border-dashed border-gray-200 rounded-xl pointer-events-none text-sm sm:text-base";
+                } else {
+                    btn.className = "px-3 py-2 bg-white text-gray-800 border border-gray-200 hover:border-badas rounded-xl flex items-center justify-center font-semibold text-sm sm:text-base shadow-md cursor-pointer block-interactive hover:translate-y-[-2px] hover:shadow-lg transition-all";
+                    btn.onclick = () => selectWordBlock(blockObj);
+                }
+                scrambledZone.appendChild(btn);
+            });
+        }
+
+        // --- Workspace Interaction Handling ---
+        function selectWordBlock(blockObj) {
+            AudioSynth.play('click');
+            blockObj.used = true;
+            assembledWords.push(blockObj);
+            renderBlocks();
+
+            // Auto-check on complete phrase assembly
+            if (assembledWords.length === sentenceSequenceArray.length) {
+                setTimeout(submitSentenceCheck, 250);
+            }
+        }
+
+        function removeBlockFromWorkspace(assembledIndex) {
+            AudioSynth.play('click');
+            const blockObj = assembledWords[assembledIndex];
+            blockObj.used = false; // Release back to resource pool
+            assembledWords.splice(assembledIndex, 1);
+            renderBlocks();
+        }
+
+        function resetAssembly() {
+            AudioSynth.play('hint');
+            assembledWords = [];
+            scrambledWords.forEach(w => w.used = false);
+            renderBlocks();
+        }
+
+        // Automatic Word Assistance Hint
+        function applyAutoWordHint() {
+            const nextCorrectIndex = assembledWords.length;
+            if (nextCorrectIndex >= sentenceSequenceArray.length) {
+                showToast("Workspace fully configured already!", "incorrect");
+                return;
+            }
+
+            AudioSynth.play('hint');
+            const targetWord = sentenceSequenceArray[nextCorrectIndex];
+
+            // Find matching unused resource word
+            const matchingWordBlock = scrambledWords.find(w => w.word === targetWord && !w.used);
+
+            if (matchingWordBlock) {
+                matchingWordBlock.used = true;
+                assembledWords.push(matchingWordBlock);
+                renderBlocks();
+                showToast(`Assembled matching block: "${targetWord}"`, "correct");
+
+                if (assembledWords.length === sentenceSequenceArray.length) {
+                    setTimeout(submitSentenceCheck, 250);
+                }
+            }
+        }
+
+        // --- Validate Formulated Instruction ---
+        function submitSentenceCheck() {
+            const assembledPhrase = assembledWords.map(w => w.word).join(" ");
+            const targetPhrase = sentenceSequenceArray.join(" ");
+
+            if (assembledPhrase === targetPhrase) {
+                // Success
+                AudioSynth.play('correct');
+                score += (30 * (currentTierIdx + 1)) + Math.min(120, globalTimeRemaining);
+                scoreDisplay.textContent = score;
+
+                showToast("CORRECT SYSTEM INSTRUCTION FORMULATED!", "correct");
+                burstParticles();
+
+                currentWordIdx++;
+                if (currentWordIdx >= sentencesPerTier) {
+                    currentWordIdx = 0;
+                    currentTierIdx++;
+                }
+
+                // Check final stage clearance
+                if (currentTierIdx >= TIERS.length) {
+                    setTimeout(() => terminateGame(true), 1200);
+                } else {
+                    setTimeout(loadSentencePuzzle, 1200);
+                }
+            } else {
+                // Incorrect
+                AudioSynth.play('incorrect');
+                const puzzleBox = document.getElementById("puzzle-box");
+                puzzleBox.classList.add("animate-shake");
+                setTimeout(() => puzzleBox.classList.remove("animate-shake"), 400);
+
+                showToast("INTEGRITY ERROR! VERIFY INSTRUCTION SEQUENCE", "incorrect");
+                resetAssembly();
+            }
+        }
+
+        // Notification toast alerts
+        function showToast(msg, status) {
+            feedbackText.textContent = msg;
+            if (status === "correct") {
+                feedbackText.className = "text-sm font-extrabold text-green-600";
+            } else {
+                feedbackText.className = "text-sm font-extrabold text-badas";
+            }
+            feedbackToast.classList.remove("opacity-0", "translate-y-1");
+            feedbackToast.classList.add("opacity-100", "translate-y-0");
+
+            setTimeout(() => {
+                feedbackToast.classList.add("opacity-0", "translate-y-1");
+                feedbackToast.classList.remove("opacity-100", "translate-y-0");
+            }, 2500);
+        }
+
+        // Visual running learner position calculations
+        function updateTrackLayout() {
+            const totalSteps = TIERS.length * sentencesPerTier;
+            const currentStep = (currentTierIdx * sentencesPerTier) + currentWordIdx;
+            const percentage = Math.min(100, Math.max(8, Math.round((currentStep / totalSteps) * 100)));
+
+            trackProgressFill.style.width = `${percentage}%`;
+            runnerAvatar.style.left = `calc(${percentage}% - 15px)`;
+        }
+
+        // --- Game End States ---
+        function terminateGame(isWin) {
+            clearInterval(timerInterval);
+            gameScreen.classList.add("hidden");
+            gameOverScreen.classList.remove("hidden");
+
+            finalScoreVal.textContent = score;
+
+            let level = "Sysadmin Apprentice";
+            if (score > 1600) {
+                level = "System Architect 🛡️";
+                resultEmoji.textContent = "🏆";
+                resultTitle.textContent = "Network Optimized!";
+                resultSubtitle.textContent = "Incredible speed! Your systematic diagnostics successfully formulated every instruction.";
+            } else if (score > 1000) {
+                level = "System Administrator ⚡";
+                resultEmoji.textContent = "⚙️";
+                resultTitle.textContent = "PC Tune-Up Finished!";
+                resultSubtitle.textContent = "Excellent diagnostics run! Most hardware tuning and file recovery directives correctly assembled.";
+            } else {
+                level = "Support Analyst 🔧";
+                resultEmoji.textContent = "⏰";
+                resultTitle.textContent = "System Fault Timeout!";
+                resultSubtitle.textContent = "The global 3-minute limit reached. Launch a new run to master computer diagnostics!";
+            }
+            
+            sysadminLevelEl.textContent = level;
+
+            if (isWin) {
+                AudioSynth.play('win-fanfare');
+                triggerFullConfetti();
+            }
+        }
+
+        // --- Custom Particle Engine ---
+        let confettiActive = false;
+        let confettiArray = [];
+        const canvas = document.getElementById("confetti-canvas");
+        const ctx = canvas.getContext("2d");
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener("resize", resizeCanvas);
+        resizeCanvas();
+
+        function burstParticles() {
+            const colors = ["#E31E24", "#F59E0B", "#10B981", "#3B82F6"];
+            for (let i = 0; i < 22; i++) {
+                confettiArray.push({
+                    x: window.innerWidth / 2,
+                    y: window.innerHeight / 2,
+                    vx: (Math.random() - 0.5) * 14,
+                    vy: (Math.random() - 0.5) * 14 - 3,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    size: Math.random() * 8 + 4,
+                    rotation: Math.random() * 360,
+                    rotationSpeed: (Math.random() - 0.5) * 10
+                });
+            }
+            if(!confettiActive) {
+                confettiActive = true;
+                drawParticles();
+            }
+        }
+
+        function triggerFullConfetti() {
+            const colors = ["#E31E24", "#2563EB", "#F59E0B", "#10B981"];
+            for (let i = 0; i < 150; i++) {
+                confettiArray.push({
+                    x: Math.random() * window.innerWidth,
+                    y: Math.random() * -window.innerHeight,
+                    vx: (Math.random() - 0.5) * 3,
+                    vy: Math.random() * 5 + 4,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    size: Math.random() * 10 + 5,
+                    rotation: Math.random() * 360,
+                    rotationSpeed: (Math.random() - 0.5) * 5
+                });
+            }
+            if(!confettiActive) {
+                confettiActive = true;
+                drawParticles();
+            }
+        }
+
+        function drawParticles() {
+            if (confettiArray.length === 0) {
+                confettiActive = false;
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                return;
+            }
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            confettiArray.forEach((p, idx) => {
+                ctx.save();
+                ctx.translate(p.x, p.y);
+                ctx.rotate((p.rotation * Math.PI) / 180);
+                ctx.fillStyle = p.color;
+                ctx.beginPath();
+                ctx.ellipse(0, 0, p.size, p.size / 2, 0, 0, 2 * Math.PI);
+                ctx.fill();
+                ctx.restore();
+
+                p.x += p.vx;
+                p.y += p.vy;
+                p.rotation += p.rotationSpeed;
+
+                if (p.y > window.innerHeight) {
+                    confettiArray.splice(idx, 1);
+                }
+            });
+
+            requestAnimationFrame(drawParticles);
+        }
+    </script>
+</body>
+</html>
